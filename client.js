@@ -122,7 +122,6 @@ recipieReqForm.addEventListener('submit', async (event) => {
 
         try {
             await getRecipie(mealName); 
-            // await getRecipieJSON(mealName) // server
             
             // wait for image to be ready before replacing the plaaceholder
             await new Promise((resolve) => {
@@ -143,25 +142,4 @@ recipieReqForm.addEventListener('submit', async (event) => {
 
 
 
-
-
-function getRecipieJSON(mealReq) {
-    const endpoint = '/requestRecipe/' + mealReq;
-
-    fetch(endpoint)
-        // Step 1: Get the Response object
-        .then(response => {
-            console.log("Response received via fetch:", response);
-            
-            // You must return this promise to the next .then
-            return response.json(); 
-        })
-        // Step 2: Receive the actual data (the text)
-        .then(data => {
-            console.log("Actual Data:", data); // This prints: Hello world!
-        })
-        .catch(error => {
-            console.error("Error:", error);
-        });
-}
 
