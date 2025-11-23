@@ -3,13 +3,13 @@ const recipieContainer = document.querySelector("#recipieContainer")
 const recipieText = document.getElementById("recipieText")
 const recipieImg = document.getElementById("recipeImg")
 const placeholder = document.querySelector("#loadingPlaceholder")
+const apikeyInput = document.querySelector("#apikey")
 
 // TODO query selector"
 
 
-function getRecipie(mealName) {
-
-    placeholder.style.display="block"
+function getRecipie(mealName, userApiKey) {
+    placeholder.style.display = "block";
 
     const prompt = `
         Create a recipe for ${mealName}.
@@ -27,68 +27,95 @@ function getRecipie(mealName) {
         - 'amount' must be a number (use 0 if 'to taste').
     `;
 
-    const apiKey = "AIzaSyBLaq3Vox53v5-Ldd-G8CvNkHZxuTXkQmA"; 
-    const model = "gemini-2.5-flash";
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    let url, headers, requestBody;
 
-    // --- The Gemini API request body (payload) is different ---
-    const requestBody = {
-        "contents": [
-            {
-                role: "user",
-                parts: [
-                    { text: prompt }
-                ]
-            }
-        ],
-    };
+    // Check if the key looks like an OpenAI key (starts with 'sk-')
+    if (userApiKey && userApiKey.startsWith('sk-')) {
+        url = "https://api.openai.com/v1/chat/completions";
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${userApiKey}`
+        };
+        requestBody = {
+            model: "gpt-3.5-turbo",
+            messages: [
+                { role: "user", content: prompt }
+            ]
+        };
+    // if gemini key
+    } else if (userApiKey) {
+        const model = "gemini-2.5-flash";
+        url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${userApiKey}`;
+        headers = {
+            "Content-Type": "application/json"
+        };
+        requestBody = {
+            contents: [
+                {
+                    role: "user",
+                    parts: [
+                        { text: prompt } // Gemini uses 'contents' and 'parts' array
+                    ]
+                }
+            ],
+        };
+
+    } else {
+        console.error("No API key provided.");
+        recipieText.textContent = "Error: Please provide a valid API key.";
+        placeholder.style.display = "none";
+        return Promise.resolve("No key.");
+    }
 
     return fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: headers,
         body: JSON.stringify(requestBody)
     })
-        .then(response => { return response.json(); })
-        .then(data => {
-            console.log("Full Gemini Response:", data.candidates[0].content);
-
-            // --- Extract the text ---
-            try {
-                // 1. Check if we have candidates (if not, the prompt was probably blocked)
-                if (!data.candidates || data.candidates.length === 0) {
-                    console.warn("Gemini Blocked the Prompt:", data.promptFeedback);
-                    return "Error: The AI refused to answer this prompt (Safety Block).";
-                }
-
-                const candidate = data.candidates[0];
-
-                // 2. Check if the response has content (sometimes it stops for safety)
-                if (!candidate.content || !candidate.content.parts) {
-                    console.warn("Gemini Blocked the Response. Finish Reason:", candidate.finishReason);
-                    return "Error: The AI started answering but stopped (Safety Block).";
-                }
-
-                // 3. Extract the text safely
-                const text = candidate.content.parts[0].text;
-                console.log("Gemini:", text);
-
-                // 4. Render Markdown
-                if (typeof marked !== 'undefined') {
-                    placeholder.style.display="none"
-                    recipieText.innerHTML = marked.parse(text);
-                } else {
-                    recipieText.textContent = text;
-                }
-
-                return text;
-            } catch (e) {
-                console.error("Error parsing Gemini response:", e);
-                console.error("Full response object:", data);
-                return "Error: Could not parse response.";
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error.message); });
             }
+            return response.json();
+        })
+        .then(data => {
+
+            let text = "";
+
+            if (userApiKey.startsWith('sk-')) {
+                // Handle OpenAI Response Structure
+                if (data.choices && data.choices.length > 0) {
+                    text = data.choices[0].message.content;
+                } else {
+                    console.error("OpenAI Error:", data);
+                    text = "Error: OpenAI did not return a response.";
+                }
+            } else {
+                // Handle Gemini Response Structure
+                if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts) {
+                    text = data.candidates[0].content.parts[0].text;
+                } else {
+                    console.error("Gemini Error:", data);
+                    text = "Error: Gemini did not return a response (Safety Block likely).";
+                }
+            }
+
+            console.log("Response Text:", text);
+            placeholder.style.display = "none";
+            
+            if (typeof marked !== 'undefined') {
+                recipieText.innerHTML = marked.parse(text);
+            } else {
+                recipieText.textContent = text;
+            }
+
+            return text;
+
         })
         .catch(error => {
-            console.error("Error fetching from Gemini:", error);
+            console.error("Fetch/API Error:", error);
+            placeholder.style.display = "none";
+            recipieText.textContent = `Error: Failed to fetch recipe. Details: ${error.message}`;
         });
 }
 
@@ -108,6 +135,7 @@ recipieReqForm.addEventListener('submit', async (event) => {
     const formData = new FormData(event.target);
     const formObj = Object.fromEntries(formData.entries());
     const mealName = formObj.mealReq;
+    const userApiKey = apikeyInput.value
 
     if (mealName.length < 2) {
         alert("input recipie name");
@@ -121,7 +149,7 @@ recipieReqForm.addEventListener('submit', async (event) => {
         const finalImageUrl = generateImageUrl(mealName);
 
         try {
-            await getRecipie(mealName); 
+            await getRecipie(mealName, userApiKey); 
             
             // wait for image to be ready before replacing the plaaceholder
             await new Promise((resolve) => {
