@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Meal recipie generator</h1>
+        <p>What meal would you like a recipie for?</p>
+    </header>
+    
+    
+    <form id="recipieReqForm" action="" method="" >
+        <input type="text" name="mealReq" id="mealReq" placeholder="Enter recipie">
+        <input type="submit" value="Generate" id="mealSubmit">
+    </form>
+    <br>
+    <div id="recipieContainer" style="display: none;">
+        <img id="recipeImg" src="" alt="Generated Meal" style="max-width: 100%; display: none; margin-top: 20px; border-radius: 10px;">
+        <p id="recipieText"></p>
+        <div id="loadingPlaceholder" style="display: none;">
+            <div class="placeholder hPlaceholder"></div>
+            <div class="placeholder pPlaceholder"></div>
+            <div class="placeholder pPlaceholder"></div>
+            <div class="placeholder pPlaceholder"></div>
+            <div class="placeholder pPlaceholderShort"></div>
+
+        </div>
+    </div>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="client.js"></script>
+</html>

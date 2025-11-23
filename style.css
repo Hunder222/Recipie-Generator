@@ -1,0 +1,123 @@
+* {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    
+}
+
+html {
+    height: 100%; 
+}
+
+body {
+    min-height: 100vh;
+    background-attachment: fixed;     
+    background-image: linear-gradient(to bottom right, rgb(255, 211, 130), #ffc251);
+}
+
+
+header{    
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+
+    color: white;    
+
+    h1{
+        font-size: 7vh;
+    }
+
+    p {
+        font-size: 4vh;
+    }
+}
+
+
+
+
+#recipieReqForm {
+    display: flex;
+    justify-self: center;
+
+    height: 7vh;
+    width: 50vw;
+    min-width: 40vh;
+    padding: 5px;
+    margin: 5px;
+    margin-bottom: 20px;
+    border-radius: 50px;
+    background-color: white;
+    justify-content: space-between;
+    
+    #mealReq, #mealSubmit {
+        border-style: none;
+        border-radius: 50px;
+        padding: 15px;
+        background-color: whitesmoke;
+        font-size: 20px;
+        align-self: center;
+        width: auto;
+    }
+
+    #mealReq {
+        min-width: 20vh;
+        flex-grow: 1;
+        margin-right: 5px;
+    }
+
+}
+
+
+#recipieContainer {
+    display: flex;
+    justify-self: center;
+    flex-direction: column;
+
+    min-height: 30vh;
+    width: 50vw;
+    min-width: 40vh;
+    background-color: rgb(255, 254, 254);
+    border-radius: 2vh;
+    padding: 3vh;
+    
+
+    p{
+        color: grey;
+    }
+
+    img {
+        max-height: 30vh;
+    }
+}
+
+
+#loadingPlaceholder {
+    width: 50vw;
+    min-width: 40vh;
+    outline-style: dotted;
+    display: block;
+
+    .placeholder {
+        border-radius:20px;
+        margin-bottom: 10px;
+        background-color: rgba(138, 138, 138, 0.5);
+    }
+
+    .hPlaceholder {
+        width: 30vw;
+        min-width: 25vh;
+        height: 6vh;
+        margin-bottom: 15px;
+    }
+
+    .pPlaceholder {
+        width: 45vw;
+        min-width: 40vh;
+        height: 3vh;
+    }
+
+    .pPlaceholderShort {
+        width: 30vw;
+        min-width: 30vh;
+        height: 3vh;
+    }
+}
+
